@@ -26,7 +26,7 @@ exports.handler = async (event) => {
   };
 
   try {
-    const model = "ggemini-1.5-flash-latest";
+    const model = "gemini-1.5-flash-latest";
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
     
     const res = await fetch(url, {
