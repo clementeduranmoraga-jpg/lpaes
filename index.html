@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAES</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+:root{--navy:#080f1e;--cyan:#5bbfd4;--cyan2:#3a9eb8;--cl:#9dd8e8;--glass:rgba(12,26,48,.82);--border:rgba(91,191,212,.22);--card:#eef5f9;--txt:#0c1e30;--ok:#27ae60;--err:#e74c3c;--font:'Outfit',sans-serif;--mono:'Space Mono',monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;width:100%;overflow:hidden;font-family:var(--font);background:var(--navy);color:#e8f4f8;}
+#cv{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.screen{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s;}
+.screen.active{opacity:1;pointer-events:all;}
+#sL{flex-direction:column;}
+.lbox{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:52px 60px 44px;text-align:center;backdrop-filter:blur(22px);box-shadow:0 0 80px rgba(91,191,212,.08),0 24px 60px rgba(0,0,0,.5);max-width:460px;width:90%;animation:fl 7s ease-in-out infinite;}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.lh1{font-size:56px;font-weight:800;color:#fff;line-height:1;margin-bottom:6px;letter-spacing:-2px;}
+.ltag{font-size:12px;color:var(--cl);opacity:.45;letter-spacing:3px;margin-bottom:38px;text-transform:uppercase;}
+.li{width:100%;padding:14px 22px;background:rgba(255,255,255,.05);border:1.5px solid var(--border);border-radius:14px;color:#fff;font-family:var(--mono);font-size:20px;text-align:center;letter-spacing:6px;outline:none;transition:border-color .3s,box-shadow .3s;margin-bottom:14px;}
+.li:focus{border-color:var(--cyan);box-shadow:0 0 24px rgba(91,191,212,.22);}
+.li::placeholder{font-size:12px;letter-spacing:2px;opacity:.3;}
+.bE{width:100%;padding:14px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));border:none;border-radius:14px;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:transform .2s,box-shadow .2s;margin-bottom:12px;}
+.bE:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(91,191,212,.35);}
+.ldiv{display:flex;align-items:center;gap:12px;margin:4px 0 12px;}
+.ldiv span{font-size:11px;color:var(--cl);opacity:.35;}
+.ldiv::before,.ldiv::after{content:'';flex:1;height:1px;background:var(--border);}
+.bR{width:100%;padding:13px;background:transparent;border:1.5px solid var(--border);border-radius:14px;color:var(--cl);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:border-color .2s,background .2s;letter-spacing:1px;}
+.bR:hover{border-color:var(--cyan);background:rgba(91,191,212,.07);}
+.lerr{color:#ff7080;font-size:12px;margin-top:12px;min-height:16px;font-weight:500;}
+.lok{color:#5dde8a;font-size:12px;margin-top:12px;min-height:16px;font-weight:500;}
+.mov{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;background:rgba(5,10,20,.85);backdrop-filter:blur(8px);}
+.mov.show{display:flex;}
+.mbox{background:rgba(10,22,42,.95);border:1px solid var(--border);border-radius:22px;padding:40px;max-width:400px;width:90%;box-shadow:0 24px 60px rgba(0,0,0,.6);text-align:center;animation:mI .3s;}
+@keyframes mI{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.mbox h3{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;}
+.mbox p{font-size:13px;color:var(--cl);opacity:.6;margin-bottom:28px;line-height:1.6;}
+.mi{width:100%;padding:13px 18px;background:rgba(255,255,255,.05);border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:var(--font);font-size:14px;outline:none;margin-bottom:14px;transition:border-color .2s;}
+.mi:focus{border-color:var(--cyan);}
+.mi::placeholder{color:rgba(255,255,255,.25);}
+.bMS{width:100%;padding:13px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));border:none;border-radius:12px;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:transform .2s;margin-bottom:10px;}
+.bMS:hover{transform:translateY(-2px);}
+.bMS:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.bMC{background:none;border:none;color:var(--cl);opacity:.5;font-size:13px;cursor:pointer;font-family:var(--font);padding:6px;transition:opacity .2s;}
+.bMC:hover{opacity:.9;}
+.mmsg{font-size:12px;min-height:16px;margin-top:8px;font-weight:500;}
+#sM{flex-direction:column;overflow-y:auto;padding:60px 20px 40px;justify-content:flex-start;}
+.mhead{text-align:center;margin-bottom:44px;}
+.mhead h1{font-size:30px;font-weight:700;color:#fff;letter-spacing:-.5px;}
+.mhead p{font-size:12px;color:var(--cl);opacity:.45;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;}
+.cards{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;max-width:1080px;}
+.sc{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:30px 22px 22px;width:186px;text-align:center;cursor:pointer;backdrop-filter:blur(16px);transition:transform .25s,box-shadow .25s,border-color .25s;}
+.sc:hover{transform:translateY(-7px);box-shadow:0 20px 44px rgba(91,191,212,.18);border-color:var(--cyan);}
+.sico{font-size:38px;margin-bottom:12px;display:block;}
+.slbl{font-size:24px;font-weight:800;color:#fff;margin-bottom:3px;}
+.snm{font-size:11px;color:var(--cl);opacity:.5;margin-bottom:18px;letter-spacing:.5px;}
+.bCo{background:none;border:none;color:var(--cyan);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px;margin:0 auto;transition:color .2s;padding:3px 0;}
+.bCo:hover{color:var(--cl);}
+.clist{display:none;margin-top:12px;text-align:left;border-top:1px solid rgba(91,191,212,.12);padding-top:10px;}
+.clist.open{display:block;}
+.clist li{list-style:none;font-size:10px;color:var(--cl);opacity:.65;padding:2px 0 2px 10px;position:relative;line-height:1.4;}
+.clist li::before{content:'·';position:absolute;left:2px;color:var(--cyan);}
+.clist .eje{font-size:9px;font-weight:700;color:var(--cyan);opacity:.8;text-transform:uppercase;letter-spacing:1px;margin-top:6px;padding-left:2px;}
+.clist .eje::before{display:none;}
+#sSb{flex-direction:column;gap:28px;}
+.sbh{text-align:center;}
+.sbh h2{font-size:56px;font-weight:800;color:#fff;letter-spacing:-2px;}
+.sbh p{font-size:13px;color:var(--cl);opacity:.5;margin-top:6px;}
+.bG{padding:18px 56px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));border:none;border-radius:18px;color:#fff;font-family:var(--font);font-size:16px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 28px rgba(91,191,212,.3);transition:transform .2s,box-shadow .2s;}
+.bG:hover{transform:translateY(-4px);box-shadow:0 14px 40px rgba(91,191,212,.42);}
+.bG:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.lmsg{font-size:13px;color:var(--cl);opacity:.65;text-align:center;min-height:20px;}
+.ldg{position:fixed;inset:0;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(8,15,30,.94);backdrop-filter:blur(10px);}
+.ldg.show{display:flex;}
+.orb{width:90px;height:90px;border-radius:50%;margin-bottom:32px;background:radial-gradient(circle at 35% 35%,var(--cl),var(--cyan),var(--cyan2));animation:po 2s ease-in-out infinite;box-shadow:0 0 40px rgba(91,191,212,.5),0 0 80px rgba(91,191,212,.2);}
+@keyframes po{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.ldg h3{font-size:20px;font-weight:700;color:#fff;margin-bottom:10px;}
+.ldg p{font-size:13px;color:var(--cl);opacity:.6;text-align:center;max-width:320px;line-height:1.6;}
+.dots{display:flex;gap:8px;margin-top:24px;}
+.dots span{width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:dt 1.4s infinite;}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes dt{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
+#bBk{position:fixed;top:18px;left:18px;z-index:200;background:var(--glass);border:1px solid var(--border);color:var(--cl);padding:8px 20px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);backdrop-filter:blur(14px);transition:background .2s;display:none;}
+#bBk.on{display:block;}
+#bBk:hover{background:rgba(91,191,212,.12);}
+#bLp{position:fixed;top:18px;right:18px;z-index:200;width:42px;height:42px;border-radius:50%;background:var(--glass);border:1px solid var(--border);color:var(--cl);cursor:pointer;display:none;align-items:center;justify-content:center;backdrop-filter:blur(14px);transition:background .2s,transform .2s;}
+#bLp.on{display:flex;}
+#bLp:hover{background:rgba(91,191,212,.18);transform:scale(1.08);}
+#bLp svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+#prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--cl));z-index:300;transition:width .3s;}
+#sHint{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.4;animation:bn 2.2s infinite;pointer-events:none;}
+#sHint span{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--cl);}
+@keyframes bn{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(7px)}}
+#chat{position:fixed;top:0;right:0;bottom:0;z-index:400;width:380px;max-width:95vw;background:rgba(7,16,32,.97);border-left:1px solid var(--border);backdrop-filter:blur(24px);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.5);}
+#chat.open{transform:translateX(0);}
+.chd{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.chdico{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--cyan),var(--cyan2));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.chtxt{flex:1;}
+.chtxt h3{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px;}
+.chtxt p{font-size:11px;color:var(--cl);opacity:.6;}
+.chX{background:none;border:none;color:var(--cl);cursor:pointer;opacity:.5;font-size:20px;padding:4px;line-height:1;transition:opacity .2s;}
+.chX:hover{opacity:1;}
+.chms{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:rgba(91,191,212,.2) transparent;}
+.msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.6;}
+.mu{align-self:flex-end;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#fff;border-bottom-right-radius:4px;}
+.mb{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--border);color:#d8eef5;border-bottom-left-radius:4px;}
+.mb strong{color:var(--cl);}
+.mty{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--border);padding:12px 16px;border-radius:14px;border-bottom-left-radius:4px;}
+.td{display:flex;gap:5px;align-items:center;}
+.td span{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:dt 1.4s infinite;}
+.td span:nth-child(2){animation-delay:.2s;}
+.td span:nth-child(3){animation-delay:.4s;}
+.chin{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;}
+.chta{flex:1;background:rgba(255,255,255,.05);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;color:#fff;font-family:var(--font);font-size:13.5px;resize:none;outline:none;max-height:100px;min-height:42px;line-height:1.5;transition:border-color .2s;scrollbar-width:none;}
+.chta::-webkit-scrollbar{display:none;}
+.chta:focus{border-color:var(--cyan);}
+.chta::placeholder{color:rgba(255,255,255,.25);}
+.chsnd{width:38px;height:38px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--cyan),var(--cyan2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;}
+.chsnd:hover{transform:scale(1.08);}
+.chsnd:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.chsnd svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+#qS{position:fixed;inset:0;z-index:10;display:none;flex-direction:column;}
+#qS.active{display:flex;}
+.qc{height:100vh;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;}
+.qc::-webkit-scrollbar{display:none;}
+.qpg{height:100vh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;padding:70px 20px 20px;}
+.qk{background:var(--card);border-radius:24px;padding:40px 50px;max-width:820px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.4);color:var(--txt);max-height:88vh;overflow-y:auto;scrollbar-width:thin;}
+.qmt{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.qn{font-family:var(--mono);font-size:11px;color:var(--cyan2);font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.qtp{font-size:11px;color:#7aabb8;background:#e4f1f6;padding:3px 10px;border-radius:20px;}
+.qsk{font-size:10px;color:#8a9bb8;background:#eaf0f6;padding:3px 10px;border-radius:20px;font-style:italic;}
+.db{font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;}
+.de{background:#d5f5e3;color:#1a6b3a;}.dm{background:#fef3d0;color:#7a4f00;}.dh{background:#fde0df;color:#7a1a1a;}
+.qtx{font-size:16px;line-height:1.8;color:var(--txt);margin-bottom:26px;}
+.opts{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.opt{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:13px;border:1.5px solid #cde2ea;background:#fff;cursor:pointer;transition:border-color .2s,background .2s;}
+.opt:hover{border-color:var(--cyan);background:#f0f9fc;}
+.opt.sel{border-color:var(--cyan);background:#e3f5fa;}
+.opt.cor{border-color:var(--ok);background:#e6f9ee;}
+.opt.wrg{border-color:var(--err);background:#fdf0f0;}
+.opt input[type=radio]{display:none;}
+.ol{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--cyan2);min-width:20px;margin-top:1px;}
+.ot{font-size:15px;line-height:1.55;color:#1a2e40;}
+.rev{display:none;margin-top:22px;padding:16px 20px;background:#e8f6ee;border-radius:13px;border-left:4px solid var(--ok);}
+.rev.show{display:block;}
+.rev p{font-size:13.5px;color:#1a4428;line-height:1.65;}
+.rev strong{color:#0e6632;}
+.rpg{height:100vh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;padding:70px 20px 20px;}
+.rk{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:52px 48px;max-width:520px;width:100%;text-align:center;backdrop-filter:blur(20px);box-shadow:0 24px 64px rgba(0,0,0,.45);}
+.rt{font-size:26px;font-weight:700;color:#fff;margin-bottom:8px;}
+.rp{font-size:78px;font-weight:800;font-family:var(--mono);color:var(--cyan);line-height:1;margin:22px 0;}
+.rr{display:flex;gap:28px;justify-content:center;margin-bottom:34px;}
+.rst .n{font-size:34px;font-weight:800;font-family:var(--mono);}
+.rst .l{font-size:11px;opacity:.55;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;}
+.gc{color:var(--ok);}.rc{color:var(--err);}.nc{color:#8abccc;}
+.bRv{width:100%;padding:14px;margin-bottom:12px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));border:none;border-radius:13px;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:transform .2s;}
+.bRv:hover{transform:translateY(-2px);}
+.bNw{width:100%;padding:13px;background:transparent;border:1.5px solid var(--border);border-radius:13px;color:var(--cl);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:border-color .2s,background .2s;}
+.bNw:hover{border-color:var(--cyan);background:rgba(91,191,212,.08);}
+@media(max-width:600px){.lbox{padding:36px 24px;}.lh1{font-size:42px;}.qk{padding:24px 18px;}.sc{width:145px;padding:22px 14px 18px;}.cards{gap:12px;}#chat{width:100vw;}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="prog" style="width:0%"></div>
+<button id="bBk" onclick="goBack()">&#8592; Menu</button>
+<button id="bLp" onclick="toggleChat()" title="Consultar dudas">
+  <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+</button>
+<div id="sHint" style="display:none">
+  <span>Scroll para avanzar</span>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+</div>
+<div class="ldg" id="ldg"><div class="orb"></div><h3>Generando preguntas</h3><p id="ldgTxt">Preparando preguntas...</p><div class="dots"><span></span><span></span><span></span></div></div>
+<div class="mov" id="modal">
+  <div class="mbox">
+    <h3>Solicitar clave de acceso</h3>
+    <p>Ingresa tu correo y te enviaremos una clave temporal valida por 15 minutos.</p>
+    <input class="mi" type="email" id="mEml" placeholder="tucorreo@gmail.com" onkeydown="if(event.key==='Enter')sendCode()">
+    <button class="bMS" id="bSnd" onclick="sendCode()">Enviar clave</button>
+    <button class="bMC" onclick="closeModal()">Cancelar</button>
+    <div class="mmsg" id="mmsg"></div>
+  </div>
+</div>
+<div class="screen active" id="sL">
+  <div class="lbox">
+    <h1 class="lh1">PAES</h1>
+    <p class="ltag">Practica 2026</p>
+    <input class="li" type="password" id="clave" placeholder="Clave de acceso" maxlength="20" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="bE" onclick="doLogin()">Ingresar</button>
+    <div class="ldiv"><span>o</span></div>
+    <button class="bR" onclick="openModal()">Solicitar clave</button>
+    <div class="lerr" id="lerr"></div>
+    <div class="lok" id="lok"></div>
+  </div>
+</div>
+<div class="screen" id="sM">
+  <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-height:100vh;overflow-y:auto;padding:50px 20px 40px;">
+    <div class="mhead"><h1>Pruebas PAES</h1><p>Admision 2026 &middot; DEMRE</p></div>
+    <div class="cards" id="cRow"></div>
+  </div>
+</div>
+<div class="screen" id="sSb">
+  <div class="sbh"><h2 id="sbTit"></h2><p id="sbDes"></p></div>
+  <button class="bG" id="bGen" onclick="startSet()">Generar 20 preguntas</button>
+  <div class="lmsg" id="lmsg"></div>
+</div>
+<div id="qS"><div class="qc" id="qc"></div></div>
+<div id="chat">
+  <div class="chd">
+    <div class="chdico">&#128172;</div>
+    <div class="chtxt"><h3>Consulta de dudas</h3><p id="chLbl">Materia</p></div>
+    <button class="chX" onclick="toggleChat()">&#215;</button>
+  </div>
+  <div class="chms" id="chms"><div class="msg mb">Hola! Puedes preguntarme cualquier cosa sobre la materia.</div></div>
+  <div class="chin">
+    <textarea class="chta" id="chIn" placeholder="Escribe tu pregunta..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="chsnd" id="chSnd" onclick="sendChat()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+<script>
+const EJS_SVC='service_paes',EJS_TPL='template_3h37qyj',EJS_KEY='BihodrGuhZpvbTYF3';
+const ADMIN='clementeduranmoraga@gmail.com',MASTER='19851015';
+
+const SUBS=[
+{id:'m1',label:'M1',name:'Matematica 1',icon:'&#128208;',desc:'Matematica 1',
+ejes:[
+{n:'Numeros',items:['Operaciones y orden en numeros enteros','Operaciones y comparacion en numeros racionales','Problemas con numeros enteros y racionales en diversos contextos','Concepto y calculo de porcentaje','Problemas con porcentaje en diversos contextos','Propiedades de potencias de base racional y exponente racional','Descomposicion y propiedades de raices enesimas en los reales','Problemas con potencias y raices enesimas en diversos contextos']},
+{n:'Algebra y Funciones',items:['Productos notables, factorizaciones y operatoria algebraica','Proporcionalidad directa e inversa con sus representaciones','Resolucion de ecuaciones lineales y problemas','Resolucion de inecuaciones lineales y problemas','Sistemas de ecuaciones lineales 2x2: resolucion y problemas','Funcion lineal y afin: concepto, tablas, graficos y problemas','Funcion cuadratica: ecuaciones de 2 grado, vertice, ceros, intersecciones con ejes, variacion de parametros, tablas y graficos']},
+{n:'Geometria',items:['Teorema de Pitagoras en diversos contextos','Perimetro y areas de triangulos, paralelogramos, trapecios y circulos','Area de superficies y volumen de paralelepipedos y cubos','Puntos y vectores en el plano cartesiano','Rotacion, traslacion y reflexion de figuras geometricas']},
+{n:'Probabilidad y Estadistica',items:['Tablas de frecuencia absoluta y relativa','Tipos de graficos estadisticos','Promedio de un conjunto de datos','Cuartiles y percentiles; diagrama de cajon','Probabilidad de un evento: regla aditiva y multiplicativa']}
+],
+habs:['Resolver problemas','Modelar','Representar','Argumentar'],
+ctx:'PAES M1 (obligatoria): competencia matematica en vida cotidiana. Contextos reales: compras, construccion, datos estadisticos. Habilidades: Resolver problemas, Modelar, Representar, Argumentar. Nivel medio/dificil: incluir trampas como datos en unidades distintas, informacion irrelevante, pregunta por el complemento, o condicion que cambia el enfoque.'},
+{id:'m2',label:'M2',name:'Matematica 2',icon:'&#8747;',desc:'Matematica 2',
+ejes:[
+{n:'Numeros (incluye M1, mas):',items:['Operaciones en el conjunto de los numeros reales','Problemas con numeros reales en diversos contextos','Matematica financiera: AFP y jubilacion, creditos hipotecarios y credito de consumo','Relacion entre potencias, raices y logaritmos, y sus propiedades','Problemas con logaritmos en diversos contextos']},
+{n:'Algebra y Funciones (incluye M1, mas):',items:['Sistemas de ecuaciones lineales 2x2: casos de unica solucion, infinitas soluciones o sin solucion','Grafico de la funcion potencia, exponencial y logaritmica','Problemas con funcion potencia, exponencial y logaritmica en diversos contextos','Grafico de las funciones trigonometricas seno y coseno','Problemas con funciones trigonometricas seno y coseno en diversos contextos']},
+{n:'Geometria (incluye M1, mas):',items:['Problemas con homotecia de figuras planas en diversos contextos','Razones trigonometricas seno, coseno y tangente en triangulos rectangulos','Problemas con razones trigonometricas en diversos contextos','Angulos y arcos en la circunferencia','Cuerdas y secantes en la circunferencia','Problemas con relaciones metricas en la circunferencia']},
+{n:'Probabilidad y Estadistica (incluye M1, mas):',items:['Medidas de dispersion de uno o mas grupos de datos','Problemas con medidas de dispersion en diversos contextos','Probabilidad condicional y sus propiedades','Permutacion y combinatoria','Problemas con permutacion y combinatoria','Modelos binomiales en diversos contextos','Distribucion normal en diversos contextos']}
+],
+habs:['Resolver problemas','Modelar','Representar','Argumentar'],
+ctx:'PAES M2 (electiva): comprension conceptual robusta para carreras cientificas. Incluye Suficiencia de Datos. Los contenidos de M1 tambien son evaluables. NO incluye limites, derivadas ni integrales.'},
+{id:'fisica',label:'Fisica',name:'Fisica',icon:'&#9883;&#65039;',desc:'Ciencias',
+ejes:[
+{n:'Ondas',items:['Elementos de ondas electromagneticas: longitud de onda, frecuencia, periodo, amplitud','Relacion entre longitud de onda, frecuencia y rapidez de propagacion','Espectro electromagnetico','Absorcion, reflexion y refraccion; propagacion rectiliea de la luz','Formacion de colores y dispersion','Efecto Doppler, interferencia y difraccion (cualitativos)','Comportamiento de la luz en espejos planos, concavos y convexos; lentes convergentes y divergentes; formacion de imagenes','Dispositivos tecnologicos: radar, prismaticos, comunicacion inalambrica, telefono movil, televisor, radio, laser, telescopio reflector y refractor, radiotelescopios, fibra optica']},
+{n:'Mecanica',items:['Leyes de Newton en cuerpos con velocidad constante o aceleracion constante','Diagrama de cuerpo libre','Fuerza peso, elastica (ley de Hooke), tension y normal','Fuerza de roce estatico y cinetico','Fuerza de roce con el aire (terminos cualitativos)']},
+{n:'Energia-Tierra',items:['Teoria de la deriva continental, sus evidencias y su relacion con la tectonica de placas','Tectonica de placas y sus consecuencias: sismos, volcanismo y formas de relieve','Modelo fisico del interior de la Tierra (geosfera) y su relacion con la tectonica de placas']},
+{n:'Electricidad',items:['Ley de Ohm en circuitos con resistores en serie, paralelo o mixto','Potencia y energia electrica en corriente continua','Corriente electrica como flujo de cargas electricas en CC','Consumo energetico, eficiencia energetica y potencia en artefactos electricos','Componentes de la instalacion electrica domiciliaria y sus funciones']}
+],
+habs:['Observar y plantear preguntas','Planificar y conducir una investigacion','Procesar y analizar la evidencia','Evaluar','Comunicar'],
+ctx:'PAES Fisica (modulo electivo Ciencias). Evalua habilidades cientificas. Las preguntas deben incluir situaciones experimentales con datos reales, interpretacion de graficos y tablas, analisis de disenos experimentales, identificacion de variables, y aplicaciones en tecnologia cotidiana.'},
+{id:'quimica',label:'Quimica',name:'Quimica',icon:'&#129514;',desc:'Ciencias',
+ejes:[
+{n:'Estructura Atomica',items:['Clasificacion de la materia: sustancias puras (elementos y compuestos) y mezclas','Separacion de mezclas: decantacion, filtracion, tamizado y destilacion; aplicaciones','Propiedades fisicas de los elementos: temperatura de ebullicion y fusion, masa, volumen, densidad','Modelos atomicos: Dalton, Thomson, Rutherford, Bohr','Electron, proton y neutron; numero atomico (Z) y numero masico (A)','Modelos de representacion de atomos o iones segun Bohr']},
+{n:'Quimica Organica',items:['Propiedades del carbono: tetravalencia, hibridacion, tipos de enlace (simple, doble y triple), energia y longitud de enlace','Modelos de representacion de moleculas organicas: formula molecular, empirica, desarrollada, condensada, topologica, esferas y varillas, modelos compactos','Hidrocarburos: alifaticos, ciclicos y aromaticos','Grupos funcionales: haluros, eteres, alcoholes, sulfuros, aminas, cetonas, aldehidos, acidos carboxilicos, anhidridos, esteres, amidas, fenoles y nitrilos','Formulacion, nombres (comunes o IUPAC) y aplicaciones de compuestos organicos']},
+{n:'Reacciones Quimicas y Estequiometria',items:['Leyes ponderales: conservacion de la materia, proporcionalidad definida y multiple','Componentes de una reaccion: reactantes y productos; balance de ecuaciones','Estequiometria: mol, masa molar, relaciones masicas; reactivo limitante y en exceso','Analisis porcentual de compuestos; formula empirica y molecular','Caracteristicas de soluciones quimicas','Concentracion molar, molal y fraccion molar','Concentraciones fisicas: %m/m, %m/v, %v/v y ppm','Dilucion y mezcla de soluciones','Solubilidad y factores que influyen en ella']}
+],
+habs:['Observar y plantear preguntas','Planificar y conducir una investigacion','Procesar y analizar la evidencia','Evaluar','Comunicar'],
+ctx:'PAES Quimica (modulo electivo Ciencias). Evalua habilidades cientificas. Las preguntas deben incluir calculos estequiometricos con contexto real, situaciones experimentales de laboratorio, analisis de datos tabulados y aplicaciones tecnologicas.'},
+{id:'biologia',label:'Biologia',name:'Biologia',icon:'&#129516;',desc:'Ciencias',
+ejes:[
+{n:'Organizacion, Estructura y Actividad Celular',items:['Estructura y funcion de organelos en procariontes y eucariontes (animales y vegetales): capsula, pared celular, membrana celular, citoesqueleto, nucleo, nucleolo, reticulos endoplasmaticos, ribosomas, lisosomas, peroxisomas, complejo de Golgi, mitocondrias, cloroplastos, vacuolas, centriolos, cilios y flagelos','Relacion entre estructura y funcion celular: enterocito, celula muscular esqueletica, neurona, celulas secretoras pancreaticas']},
+{n:'Procesos y Funciones Biologicas',items:['Participacion de gametos (ovocitos y espermatozoides) y su funcion en la fecundacion','Ciclo ovarico y uterino: caracteristicas generales y sus fases','Metodos de control de la natalidad: naturales (Billings, calendario, temperatura basal), artificiales reversibles (hormonales y de barrera) y parcialmente reversibles (quirurgicos)','ITS: VIH, herpes, gonorrea y clamidia - tipo de agente patogeno, mecanismo de transmision, sintomas generales y medidas de prevencion']},
+{n:'Herencia y Evolucion',items:['Ciclo celular: estructura de la cromatina, grados de compactacion, puntos de control G1-S, G2-M y Metafase; interfase (G1, S, G2); mitosis (profase, metafase, anafase, telofase)','Meiosis I y II y contribucion a la variabilidad genetica','Manipulacion genetica y aplicaciones: alimentos, detergentes, vestuario y farmacos','Evidencias de evolucion: anatomia comparada (estructuras homologas y analogas), embriologia, biologia molecular y registro fosil','Aportes de Lamarck, Darwin y Wallace al estudio de mecanismos evolutivos','Seleccion natural: fundamentos y ejemplos']},
+{n:'Organismo y Ambiente',items:['Fotosintesis: etapas (luminosa y oscura), lugar donde ocurren, reactantes, productos; efecto de variables ambientales','Rol general de la fotosintesis y la respiracion celular en los ecosistemas','Comparacion entre nutricion autotrofa y heterotrofa','Cadenas troficas y su rol en el flujo de materia y energia en ecosistemas']}
+],
+habs:['Observar y plantear preguntas','Planificar y conducir una investigacion','Procesar y analizar la evidencia','Evaluar','Comunicar'],
+ctx:'PAES Biologia (modulo electivo Ciencias). Evalua habilidades cientificas. Las preguntas deben incluir analisis de experimentos cientificos, interpretacion de graficos de investigaciones biologicas, situaciones de salud publica y aplicaciones medicas o ambientales.'}
+];
+
+let cur=null,qs=[],ans={},done=false,hist=[],chatOpen=false,tCode=null,tExp=null;
+
+// FONDO LINEAS GEOMETRICAS
+(function(){
+  const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  let W,H,lines=[];
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  function buildLines(){
+    lines=[];
+    for(let i=0;i<30;i++){
+      lines.push({
+        x:rnd(0,W),y:rnd(0,H),
+        angle:rnd(0,Math.PI*2),
+        len:rnd(80,300),
+        speed:rnd(0.00008,0.00020)*(Math.random()<.5?1:-1),
+        drift:rnd(0.010,0.035)*(Math.random()<.5?1:-1),
+        driftPhase:rnd(0,Math.PI*2),
+        alpha:rnd(0.04,0.11),
+        width:rnd(0.4,1.4)
+      });
+    }
+  }
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;buildLines();}
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,W*.3,H);
+    g.addColorStop(0,'#080f1e');g.addColorStop(.6,'#0b1a30');g.addColorStop(1,'#07142a');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    lines.forEach(l=>{
+      l.angle+=l.speed;
+      l.x+=Math.cos(t*0.0003+l.driftPhase)*l.drift;
+      l.y+=Math.sin(t*0.0004+l.driftPhase)*l.drift;
+      if(l.x<-l.len)l.x=W+l.len;
+      if(l.x>W+l.len)l.x=-l.len;
+      if(l.y<-l.len)l.y=H+l.len;
+      if(l.y>H+l.len)l.y=-l.len;
+      const cx=Math.cos(l.angle),cy=Math.sin(l.angle);
+      ctx.beginPath();
+      ctx.moveTo(l.x-cx*l.len/2,l.y-cy*l.len/2);
+      ctx.lineTo(l.x+cx*l.len/2,l.y+cy*l.len/2);
+      ctx.strokeStyle='rgba(91,191,212,'+l.alpha+')';
+      ctx.lineWidth=l.width;
+      ctx.stroke();
+    });
+  }
+  function loop(t){draw(t);requestAnimationFrame(loop);}
+  addEventListener('resize',resize);resize();requestAnimationFrame(loop);
+})();
+
+emailjs.init(EJS_KEY);
+const genCode=()=>Math.floor(100000+Math.random()*900000).toString();
+function openModal(){document.getElementById('modal').classList.add('show');document.getElementById('mEml').focus();document.getElementById('mmsg').textContent='';}
+function closeModal(){document.getElementById('modal').classList.remove('show');document.getElementById('mEml').value='';document.getElementById('mmsg').textContent='';}
+async function sendCode(){
+  const email=document.getElementById('mEml').value.trim();
+  const btn=document.getElementById('bSnd'),msg=document.getElementById('mmsg');
+  if(!email||!email.includes('@')){msg.style.color='#ff7080';msg.textContent='Ingresa un correo valido.';return;}
+  btn.disabled=true;btn.textContent='Enviando...';
+  msg.style.color='var(--cl)';msg.textContent='Generando clave...';
+  tCode=genCode();tExp=Date.now()+15*60*1000;
+  try{
+    await emailjs.send(EJS_SVC,EJS_TPL,{to_email:ADMIN,from_email:email,access_code:tCode,expiry:'15 minutos',user_email:email});
+    msg.style.color='#5dde8a';msg.textContent='Clave enviada. Valida 15 minutos.';
+    btn.textContent='Enviado';
+    setTimeout(()=>{closeModal();document.getElementById('lok').textContent='Revisa tu correo con la clave.';document.getElementById('clave').focus();},2000);
+  }catch{msg.style.color='#ff7080';msg.textContent='Error al enviar. Intenta nuevamente.';btn.disabled=false;btn.textContent='Enviar clave';}
+}
+function doLogin(){
+  const v=document.getElementById('clave').value.trim();
+  if(v===MASTER||(tCode&&v===tCode&&Date.now()<tExp)){
+    document.getElementById('lerr').textContent='';document.getElementById('lok').textContent='';
+    if(v===tCode)tCode=null;
+    showScreen('sM');renderMenu();
+  }else{
+    document.getElementById('lerr').textContent='Clave incorrecta o expirada.';
+    const inp=document.getElementById('clave');inp.value='';inp.style.borderColor='#ff7080';
+    setTimeout(()=>{inp.style.borderColor='';document.getElementById('lerr').textContent='';},2000);
+    inp.focus();
+  }
+}
+document.getElementById('clave').focus();
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const qS=document.getElementById('qS');
+  qS.classList.remove('active');qS.style.display='none';
+  document.getElementById('sHint').style.display='none';
+  document.getElementById('bBk').classList.remove('on');
+  document.getElementById('bLp').classList.remove('on');
+  document.getElementById('chat').classList.remove('open');chatOpen=false;
+  if(id==='qS'){
+    qS.style.display='flex';qS.classList.add('active');
+    document.getElementById('bBk').classList.add('on');
+    document.getElementById('bLp').classList.add('on');
+    document.getElementById('sHint').style.display='flex';
+  }else{
+    const el=document.getElementById(id);if(el)el.classList.add('active');
+    if(id!=='sL')document.getElementById('bBk').classList.add('on');
+    if(id==='sM')document.getElementById('bBk').classList.remove('on');
+  }
+  document.getElementById('prog').style.width='0%';
+}
+function goBack(){
+  if(document.getElementById('qS').classList.contains('active'))showScreen('sSb');
+  else showScreen('sM');
+}
+
+function renderMenu(){
+  const row=document.getElementById('cRow');row.innerHTML='';
+  SUBS.forEach(s=>{
+    const card=document.createElement('div');card.className='sc';
+    let listHTML='';
+    s.ejes.forEach(e=>{
+      listHTML+='<li class="eje">'+e.n+'</li>';
+      e.items.forEach(it=>{listHTML+='<li>'+it+'</li>';});
+    });
+    card.innerHTML='<span class="sico">'+s.icon+'</span><div class="slbl">'+s.label+'</div><div class="snm">'+s.name+'</div><button class="bCo" onclick="toggleC(event,\''+s.id+'\')"><span id="ct-'+s.id+'">contenidos ›</span></button><ul class="clist" id="cl-'+s.id+'">'+listHTML+'</ul>';
+    card.addEventListener('click',function(e){if(e.target.closest('.bCo'))return;openSub(s.id);});
+    row.appendChild(card);
+  });
+}
+function toggleC(e,id){
+  e.stopPropagation();
+  const l=document.getElementById('cl-'+id),t=document.getElementById('ct-'+id);
+  const o=l.classList.toggle('open');t.textContent=o?'contenidos v':'contenidos >';
+}
+function openSub(id){
+  cur=SUBS.find(s=>s.id===id);
+  document.getElementById('sbTit').textContent=cur.label;
+  document.getElementById('sbDes').textContent=cur.name+' - '+cur.desc;
+  document.getElementById('lmsg').textContent='';
+  document.getElementById('bGen').disabled=false;
+  hist=[];
+  document.getElementById('chms').innerHTML='<div class="msg mb">Hola! Puedes preguntarme cualquier cosa sobre '+cur.name+'.</div>';
+  document.getElementById('chLbl').textContent=cur.name;
+  showScreen('sSb');
+}
+
+async function callAPI(payload){
+  const res=await fetch('/.netlify/functions/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!res.ok){const t=await res.text();throw new Error('Error '+res.status+': '+t);}
+  return res.json();
+}
+
+async function startSet(){
+  document.getElementById('bGen').disabled=true;
+  document.getElementById('lmsg').textContent='';
+  document.getElementById('ldg').classList.add('show');
+  document.getElementById('ldgTxt').textContent='Preparando preguntas de '+cur.name+'...';
+  const temario=cur.ejes.map(e=>e.n+'\n'+e.items.map(i=>'- '+i).join('\n')).join('\n\n');
+  const prompt='Eres un constructor de items oficial del DEMRE para la PAES '+cur.name+', proceso de admision 2026 de Chile.\n\n'+cur.ctx+'\n\nTEMARIO OFICIAL DEMRE 2026 - UNICAMENTE estos contenidos son validos:\n'+temario+'\n\nHABILIDADES A EVALUAR: '+cur.habs.join(', ')+'\n\nINSTRUCCIONES:\n\nDISTRIBUCION OBLIGATORIA: 5 FACILES (easy) - 10 MEDIAS (medium) - 5 DIFICILES (hard)\n\nFACIL: Aplicacion directa de un concepto. Enunciado claro. Distractores son errores simples plausibles.\n\nMEDIA: Requiere 2+ pasos. OBLIGATORIO incluir al menos una trampa: (a) datos en unidades distintas que hay que convertir, (b) informacion irrelevante incluida, (c) la pregunta pide el complemento de lo obvio, (d) condicion que cambia el enfoque si se lee bien. Distractores son errores de razonamiento frecuentes.\n\nDIFICIL: Integra 2+ contenidos. Razonamiento no lineal. Puede ser tipo cual afirmacion es INCORRECTA. Al menos 2 distractores son errores de razonamiento muy comunes. Puede incluir tablas o graficos descritos en texto.\n\nREGLAS:\n- Cada pregunta cubre un tema DISTINTO del temario\n- Solo se evaluan los contenidos del temario indicado (no inventar otros)\n- 4 opciones plausibles, una sola correcta\n- La explicacion debe demostrar paso a paso por que la respuesta es correcta Y por que cada distractor es incorrecto\n- Indica la habilidad especifica evaluada en skill\n\nResponde UNICAMENTE con JSON valido sin texto adicional ni backticks:\n{"questions":[{"difficulty":"easy","topic":"tema especifico del temario","skill":"habilidad evaluada","question":"enunciado","options":{"A":"...","B":"...","C":"...","D":"..."},"answer":"A","explanation":"paso a paso: por que A es correcta. Por que B es incorrecta. Por que C es incorrecta. Por que D es incorrecta."}]}';
+  try{
+    const data=await callAPI({max_tokens:9000,messages:[{role:'user',content:prompt}]});
+    const raw=data.content.map(b=>b.text||'').join('');
+    const clean=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    let parsed;
+    try{parsed=JSON.parse(clean);}catch{const m=clean.match(/\{[\s\S]*\}/);if(m)parsed=JSON.parse(m[0]);else throw new Error('Parse error');}
+    if(!parsed.questions||parsed.questions.length<10)throw new Error('Respuesta incompleta');
+    qs=parsed.questions.slice(0,20);ans={};done=false;
+    renderQs();
+    document.getElementById('ldg').classList.remove('show');
+    showScreen('qS');
+  }catch(e){
+    document.getElementById('ldg').classList.remove('show');
+    document.getElementById('bGen').disabled=false;
+    document.getElementById('lmsg').textContent='Error al generar. Verifica tu conexion e intenta nuevamente.';
+    console.error(e);
+  }
+}
+
+function renderQs(){
+  const c=document.getElementById('qc');c.innerHTML='';
+  const dm={easy:'Facil',medium:'Media',hard:'Dificil'};
+  const dc={easy:'de',medium:'dm',hard:'dh'};
+  qs.forEach((q,i)=>{
+    const pg=document.createElement('div');pg.className='qpg';
+    pg.innerHTML='<div class="qk"><div class="qmt"><span class="qn">Pregunta '+(i+1)+'/'+qs.length+'</span><span class="db '+(dc[q.difficulty]||'dm')+'">'+(dm[q.difficulty]||'Media')+'</span><span class="qtp">'+(q.topic||'')+'</span>'+(q.skill?'<span class="qsk">'+q.skill+'</span>':'')+'</div><p class="qtx">'+q.question+'</p><ul class="opts" id="op-'+i+'">'+['A','B','C','D'].map(lt=>'<li class="opt" id="o-'+i+'-'+lt+'" onclick="pick('+i+',\''+lt+'\')"><input type="radio" name="q'+i+'" value="'+lt+'"><span class="ol">'+lt+'</span><span class="ot">'+(q.options[lt]||'')+'</span></li>').join('')+'</ul><div class="rev" id="rv-'+i+'"><p><strong>Respuesta correcta: '+q.answer+'</strong></p><p style="margin-top:9px;">'+(q.explanation||'')+'</p></div></div>';
+    c.appendChild(pg);
+  });
+  const rp=document.createElement('div');rp.className='rpg';
+  rp.innerHTML='<div class="rk"><div class="rt">Resultados</div><div class="rp" id="rpct">-</div><div class="rr"><div class="rst"><div class="n gc" id="rok">0</div><div class="l">Correctas</div></div><div class="rst"><div class="n rc" id="rwrng">0</div><div class="l">Incorrectas</div></div><div class="rst"><div class="n nc" id="rblnk">0</div><div class="l">Sin resp.</div></div></div><button class="bRv" onclick="revealAll()">Mostrar respuestas</button><button class="bNw" onclick="startSet()">Nuevo set</button></div>';
+  c.appendChild(rp);
+  c.addEventListener('scroll',()=>{
+    const tot=c.scrollHeight-c.clientHeight;
+    if(tot>0)document.getElementById('prog').style.width=(c.scrollTop/tot*100)+'%';
+    if(!done){const r=rp.getBoundingClientRect();if(r.top<innerHeight*.6){calcResults();done=true;}}
+  });
+}
+function pick(qi,lt){
+  ans[qi]=lt;
+  document.querySelectorAll('#op-'+qi+' .opt').forEach(el=>el.classList.remove('sel'));
+  const el=document.getElementById('o-'+qi+'-'+lt);
+  el.classList.add('sel');el.querySelector('input').checked=true;
+}
+function calcResults(){
+  let ok=0,wr=0,bl=0;
+  qs.forEach((q,i)=>{const a=ans[i];if(!a)bl++;else if(a===q.answer)ok++;else wr++;});
+  document.getElementById('rpct').textContent=Math.round(ok/qs.length*100)+'%';
+  document.getElementById('rok').textContent=ok;
+  document.getElementById('rwrng').textContent=wr;
+  document.getElementById('rblnk').textContent=bl;
+}
+function revealAll(){
+  qs.forEach((q,i)=>{
+    document.getElementById('rv-'+i).classList.add('show');
+    ['A','B','C','D'].forEach(lt=>{
+      const el=document.getElementById('o-'+i+'-'+lt);if(!el)return;
+      el.style.pointerEvents='none';
+      if(lt===q.answer)el.classList.add('cor');
+      else if(ans[i]===lt)el.classList.add('wrg');
+    });
+  });
+  document.getElementById('qc').scrollTo({top:0,behavior:'smooth'});
+}
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chat').classList.toggle('open',chatOpen);
+  if(chatOpen)setTimeout(()=>document.getElementById('chIn').focus(),350);
+}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function handleChatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+function appendMsg(role,text){
+  const c=document.getElementById('chms');
+  const d=document.createElement('div');
+  d.className='msg '+(role==='user'?'mu':'mb');
+  d.innerHTML=text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function showTyping(){
+  const c=document.getElementById('chms');
+  const d=document.createElement('div');d.className='mty';d.id='typ';
+  d.innerHTML='<div class="td"><span></span><span></span><span></span></div>';
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function rmTyping(){const t=document.getElementById('typ');if(t)t.remove();}
+async function sendChat(){
+  const inp=document.getElementById('chIn');
+  const text=inp.value.trim();if(!text)return;
+  inp.value='';inp.style.height='auto';
+  document.getElementById('chSnd').disabled=true;
+  appendMsg('user',text);hist.push({role:'user',content:text});showTyping();
+  const temario=cur?cur.ejes.map(e=>e.n+': '+e.items.join(', ')).join('\n'):'';
+  const sys='Eres un tutor experto en '+(cur?cur.name:'PAES Chile')+' para la PAES 2026.\nTemario oficial DEMRE:\n'+temario+'\nHabilidades: '+(cur?cur.habs.join(', '):'')+'\nResponde claro, didactico y paso a paso. Usa ejemplos concretos. Responde siempre en espanol.';
+  try{
+    const data=await callAPI({max_tokens:1200,system:sys,messages:hist});
+    const reply=data.content.map(b=>b.text||'').join('').trim();
+    rmTyping();appendMsg('bot',reply);
+    hist.push({role:'assistant',content:reply});
+    if(hist.length>20)hist=hist.slice(-20);
+  }catch{rmTyping();appendMsg('bot','Lo siento, hubo un error. Intenta nuevamente.');}
+  document.getElementById('chSnd').disabled=false;
+  document.getElementById('chIn').focus();
+}
+</script>
+</body>
+</html>
